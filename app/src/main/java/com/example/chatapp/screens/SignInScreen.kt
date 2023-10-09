@@ -1,7 +1,5 @@
 package com.example.chatapp.screens
 
-import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,30 +35,27 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
-import com.example.chatapp.LoginActivity
-import com.example.chatapp.MainActivity
 import com.example.chatapp.R
 import com.example.chatapp.database.UserAuth
 import com.example.chatapp.navigationComponent.Screen
 import com.example.chatapp.ui.theme.ChatBoxShape
 import com.example.chatapp.ui.theme.Shapes
 import com.example.chatapp.ui.theme.poppinsFont
+import com.example.chatapp.use_case.userState.UserViewModel
 import com.example.chatapp.validation.Validation
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SignInScreen(
     modifier: Modifier,
-    context: Context,
-    onClick:()->Unit,
+   navController: NavController
 ) {
     val keyboardController =LocalSoftwareKeyboardController.current
+    val setLogin = UserViewModel()
     val auth= UserAuth()
     val validation=Validation()
     var userName by rememberSaveable {
@@ -184,7 +179,10 @@ fun SignInScreen(
                             onClick = {
                                 auth.signUpUser(email, password) { isSuccess, errorMessage ->
                                     if (isSuccess){
-                                        onClick()
+                                        navController.navigate(Screen.Home.route){
+                                            popUpTo("auth")
+                                        }
+                                        setLogin.setLoginUser(userName=userName,email=email)
 
                                     }else {
                                         // Show error message to the user
@@ -208,8 +206,7 @@ fun SignInScreen(
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             modifier = Modifier.clickable {
-                                val nav=Intent(context,LoginActivity::class.java)
-                                context.startActivity(nav)
+                               navController.navigate(Screen.LoginScreen.route)
 
                             }
                         )

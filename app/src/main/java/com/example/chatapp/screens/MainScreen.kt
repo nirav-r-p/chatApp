@@ -1,8 +1,6 @@
 package com.example.chatapp.screens
 
-import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,13 +34,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.chatapp.LandingActivity
-import com.example.chatapp.MainActivity
+import com.example.chatapp.R
 import com.example.chatapp.component.ContactCard
 import com.example.chatapp.component.ContactsList
 import com.example.chatapp.component.GetInfo
 import com.example.chatapp.component.StatusInfo
-import com.example.chatapp.R
 import com.example.chatapp.database.UserAuth
 import com.example.chatapp.navigationComponent.Screen
 import com.example.chatapp.ui.theme.Shapes
@@ -59,6 +55,9 @@ fun HomeScreen(modifier: Modifier,navController: NavController) {
             FloatingActionButton(
                 onClick = {
                     user.logoutUser()
+                    navController.navigate("auth"){
+                        popUpTo("chat")
+                    }
 
                 }
             ) {

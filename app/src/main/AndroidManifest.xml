@@ -12,31 +12,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatApp"
         tools:targetApi="31" >
-        <activity android:name=".LandingActivity"
-            android:label="LandingPage"
-            android:theme="@style/Base.Theme.ChatApp"
-            android:exported="true">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.ChatApp" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".SigInActivity"
-            android:label="@string/title_activity_sign_in_page"
-            android:theme="@style/Theme.ChatApp"
-            android:exported="false"/>
-        <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.ChatApp" />
-        <activity
-            android:name=".LoginActivity"
-            android:exported="false"
-            android:label="LoginPage"
-            android:theme="@style/Theme.ChatApp" />
+
     </application>
 
 </manifest>

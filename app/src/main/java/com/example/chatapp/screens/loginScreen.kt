@@ -2,8 +2,6 @@ package com.example.chatapp.screens
 
 
 
-import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,38 +14,32 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import com.example.chatapp.LoginActivity
-import com.example.chatapp.MainActivity
 import com.example.chatapp.R
 import com.example.chatapp.database.UserAuth
 import com.example.chatapp.navigationComponent.Screen
@@ -59,7 +51,7 @@ import com.example.chatapp.ui.theme.poppinsFont
 @Composable
 fun LoginScreen(
     modifier: Modifier,
-   onClick: ()->Unit
+   navController: NavController
 ) {
    val auth=UserAuth()
     val keyboardController =LocalSoftwareKeyboardController.current
@@ -100,7 +92,7 @@ fun LoginScreen(
                         TextField(
                             value = email,
                             onValueChange = { email = it },
-                            label = { Text(text = "User Name") },
+                            label = { Text(text = "User Email") },
                             modifier = Modifier
                                 .fillMaxWidth(0.95f).padding(horizontal = 2.dp)
                                 .background(Color.White, shape = RoundedCornerShape(30.dp)),
@@ -143,13 +135,16 @@ fun LoginScreen(
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
-                            shape = Shapes.medium
+                            shape = Shapes.medium,
+                            visualTransformation = PasswordVisualTransformation()
                         )
                         ElevatedButton(
                             onClick = {
                                 auth.loginUser(email, password) { isSuccess, errorMessage ->
                                     if (isSuccess) {
-                                        onClick()
+                                        navController.navigate(Screen.Home.route){
+                                            popUpTo("auth")
+                                        }
                                     } else {
                                         // Show error message to the user
                                         print(errorMessage.toString())

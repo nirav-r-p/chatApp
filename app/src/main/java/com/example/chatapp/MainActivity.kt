@@ -1,5 +1,6 @@
 package com.example.chatapp
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +19,7 @@ import com.example.chatapp.ui.theme.ChatAppTheme
 
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
+    private  var entry:String="auth"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -29,11 +31,19 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     navController= rememberNavController()
-                    SetupNavGraph(navController = navController)
+                    SetupNavGraph(navController = navController,entry)
                 }
             }
         }
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val auth=UserAuth()
+        if (auth.isLoggedIn()){
+           entry="chat"
+        }
     }
 }
 @Preview(showBackground = true)
