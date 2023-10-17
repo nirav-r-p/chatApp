@@ -31,11 +31,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.chatapp.R
 import com.example.chatapp.ui.theme.poppinsFont
+import com.example.chatapp.use_case.userState.UserInfo
 
 @Composable
 fun ContactCard(
-    userName:String="Berry Ab",
-    userProfilePic:Int= R.drawable.img_2,
+    user:UserInfo,
     lastMessage:String="Hi Nirav, I am Looking for Android Dev",
     lastChatTime:String="8.30 pm",
     numberOfMessage:Int=0,
@@ -60,7 +60,7 @@ fun ContactCard(
                 contentAlignment =  Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(userProfilePic),
+                    painter = painterResource(R.drawable.img),
                     contentDescription = "" , contentScale = ContentScale.FillBounds,
                     modifier = Modifier
                         .clip(
@@ -102,7 +102,7 @@ fun ContactCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = userName,
+                    text = user.userName.toString(),
                     fontFamily = poppinsFont,
                     fontWeight = FontWeight.SemiBold,
                     fontSize=15.sp,
@@ -133,8 +133,8 @@ fun ContactCard(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ContactCardPreview() {
-    ContactCard(onClick = {})
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun ContactCardPreview() {
+//    ContactCard()
+//}

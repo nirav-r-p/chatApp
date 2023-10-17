@@ -8,15 +8,13 @@ class Validation {
         if(input.length < 8) return false
         return true
     }
-//    fun isValidateEmail(input: String):Boolean{
-//        val emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." +
-//                "[a-zA-Z0-9_+&*-]+)*@" +
-//                "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
-//                "A-Z]{2,7}$"
-//
-//        val pat: Pattern = Pattern.compile(emailRegex)
-//        if (input.isBlank())
-//            return false;
-//        return pat.matcher(input).matches();
-//    }
+    fun isValidateEmail(input: String):Boolean{
+        val emailRegex =
+            "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$"
+
+        val pat: Pattern = Pattern.compile(emailRegex)
+        if (input.isBlank())
+            return false;
+        return pat.matcher(input).matches();
+    }
 }

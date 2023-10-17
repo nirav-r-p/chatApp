@@ -1,13 +1,15 @@
 package com.example.chatapp
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
@@ -16,12 +18,22 @@ import com.example.chatapp.component.StatusInfo
 import com.example.chatapp.database.UserAuth
 import com.example.chatapp.navigationComponent.SetupNavGraph
 import com.example.chatapp.ui.theme.ChatAppTheme
+import com.example.chatapp.use_case.viewModels.ChatViewModel
+import com.example.chatapp.use_case.viewModels.UserViewModel
+import com.example.chatapp.use_case.viewModels.LoginViewModel
+import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
     private  var entry:String="auth"
+
+    private val loginViewModel : LoginViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
+    private val chatViewModel: ChatViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+       val mDbRef = FirebaseDatabase.getInstance().getReference("user")
 
         setContent {
             ChatAppTheme {
@@ -31,20 +43,25 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     navController= rememberNavController()
-                    SetupNavGraph(navController = navController,entry)
+                    SetupNavGraph(
+                        navController = navController,
+                        entry,
+                        loginViewModel,
+                        userViewModel,
+                        chatViewModel
+                    )
                 }
             }
         }
-
     }
 
     override fun onStart() {
         super.onStart()
-        val auth=UserAuth()
-        if (auth.isLoggedIn()){
+        if (loginViewModel.isLoggedIn()){
            entry="chat"
         }
     }
+    
 }
 @Preview(showBackground = true)
 @Composable

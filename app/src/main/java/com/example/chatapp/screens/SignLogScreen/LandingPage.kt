@@ -1,4 +1,4 @@
-package com.example.chatapp.screens
+package com.example.chatapp.screens.SignLogScreen
 
 
 import android.annotation.SuppressLint
@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -37,7 +38,6 @@ fun LandingPage(
     modifier: Modifier,
     navController: NavController
 ) {
-
     Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = modifier
             .weight(1f)
@@ -46,17 +46,17 @@ fun LandingPage(
             Image(painter = painterResource(id = R.drawable.img_7), contentDescription ="" , contentScale = ContentScale.FillBounds, modifier = modifier.fillMaxSize())
         }
         Box (modifier = modifier
-            .weight(1f)
+            .weight(1.1f)
             .background(Color.Black)
             .padding(36.dp)
         ){
-            Column {
+            Column(modifier = Modifier.fillMaxSize()) {
                 Text(
                     text = "Stay connected with your friends and family",
                     fontFamily = poppinsFont,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    fontSize = 36.sp
+                    fontSize = 36.sp,
                 )
                 Row (verticalAlignment = Alignment.CenterVertically){
                     Icon(

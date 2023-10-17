@@ -1,4 +1,4 @@
-package com.example.chatapp.screens
+package com.example.chatapp.screens.SignLogScreen
 
 
 
@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -31,6 +32,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,19 +43,19 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.chatapp.R
-import com.example.chatapp.database.UserAuth
 import com.example.chatapp.navigationComponent.Screen
 import com.example.chatapp.ui.theme.ChatBoxShape
 import com.example.chatapp.ui.theme.Shapes
 import com.example.chatapp.ui.theme.poppinsFont
+import com.example.chatapp.use_case.viewModels.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(
     modifier: Modifier,
-   navController: NavController
+    navController: NavController,
+    viewModel: LoginViewModel
 ) {
-   val auth=UserAuth()
     val keyboardController =LocalSoftwareKeyboardController.current
 
     var email by rememberSaveable {
@@ -62,13 +64,28 @@ fun LoginScreen(
     var password by rememberSaveable {
         mutableStateOf("")
     }
+    var isLoading by rememberSaveable {
+        mutableStateOf(false)
+    }
+    viewModel.loadingState.observe(LocalLifecycleOwner.current) { loadingState ->
+        isLoading = when (loadingState) {
+            LoginViewModel.UiLoadingState.IsLoading -> {
+                true
+            }
+            LoginViewModel.UiLoadingState.IsNotLoading -> {
+                false
+            }
+        }
+    }
     Column(modifier = modifier.fillMaxSize())
     {
         Box(modifier = modifier
             .weight(1f)
             .fillMaxWidth()
             .background(Color.Black, shape = ChatBoxShape.large)) {
-            Image(painter = painterResource(id = R.drawable.img_7), contentDescription ="" , contentScale = ContentScale.FillBounds, modifier = modifier.fillMaxSize().zIndex(5f))
+            Image(painter = painterResource(id = R.drawable.img_7), contentDescription ="" , contentScale = ContentScale.FillBounds, modifier = modifier
+                .fillMaxSize()
+                .zIndex(5f))
         }
         Box (modifier = modifier
             .weight(1.4f)
@@ -88,13 +105,16 @@ fun LoginScreen(
                     .weight(1f)
                     .fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(
-                        modifier=Modifier.safeContentPadding().fillMaxHeight(), verticalArrangement = Arrangement.SpaceEvenly, horizontalAlignment = Alignment.CenterHorizontally) {
+                        modifier= Modifier
+                            .safeContentPadding()
+                            .fillMaxHeight(), verticalArrangement = Arrangement.SpaceEvenly, horizontalAlignment = Alignment.CenterHorizontally) {
                         TextField(
                             value = email,
                             onValueChange = { email = it },
                             label = { Text(text = "User Email") },
                             modifier = Modifier
-                                .fillMaxWidth(0.95f).padding(horizontal = 2.dp)
+                                .fillMaxWidth(0.95f)
+                                .padding(horizontal = 2.dp)
                                 .background(Color.White, shape = RoundedCornerShape(30.dp)),
                             singleLine = true,
                             keyboardActions = KeyboardActions(
@@ -112,14 +132,13 @@ fun LoginScreen(
                             ),
                             shape = Shapes.medium
                         )
-
-
                         TextField(
                             value = password,
                             onValueChange = { password = it },
                             label = { Text(text = "Password") },
                             modifier = Modifier
-                                .fillMaxWidth(0.95f).padding(horizontal = 2.dp)
+                                .fillMaxWidth(0.95f)
+                                .padding(horizontal = 2.dp)
                                 .background(Color.White, shape = RoundedCornerShape(30.dp)),
                             singleLine = true,
                             keyboardActions = KeyboardActions(
@@ -140,7 +159,7 @@ fun LoginScreen(
                         )
                         ElevatedButton(
                             onClick = {
-                                auth.loginUser(email, password) { isSuccess, errorMessage ->
+                                viewModel.loginUser(email, password) { isSuccess, errorMessage ->
                                     if (isSuccess) {
                                         navController.navigate(Screen.Home.route){
                                             popUpTo("auth")
@@ -156,11 +175,15 @@ fun LoginScreen(
                                 .height(64.dp)
                         )
                         {
-                            Text(
-                                text = "Let’s Chat",fontFamily = poppinsFont,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black
-                            )
+                            if (isLoading){
+                                CircularProgressIndicator()
+                            }else {
+                                Text(
+                                    text = "Let’s Chat", fontFamily = poppinsFont,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black
+                                )
+                            }
                         }
                     }
 

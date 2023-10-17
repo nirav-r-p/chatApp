@@ -43,7 +43,7 @@ import com.example.chatapp.ui.theme.poppinsFont
 fun CardHeader(
     userName:String="Berry Ab",
     userProfilePic:Int= R.drawable.img_4,
-    onLineStatus:Boolean,
+    action:String,
     horizontalPadding: Dp =6.dp,
     verticalPadding: Dp =6.dp
 ) {
@@ -98,7 +98,7 @@ fun CardHeader(
                         color= Color.White
                     )
                     Text(
-                        text = if(onLineStatus) "Online" else "Offline",
+                        text = action,
                         fontFamily = poppinsFont,
                         fontWeight = FontWeight.Normal,
                         fontSize=14.sp,
@@ -117,8 +117,8 @@ fun CardHeader(
 
 }
 
-@Preview(showBackground = true, backgroundColor = 0)
-@Composable
-fun CardHeaderPreview() {
-    CardHeader(onLineStatus = true)
-}
+//@Preview(showBackground = true, backgroundColor = 0)
+//@Composable
+//fun CardHeaderPreview() {
+//    CardHeader(onLineStatus = true)
+//}

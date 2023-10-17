@@ -1,4 +1,4 @@
-package com.example.chatapp.screens
+package com.example.chatapp.screens.mainScreens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import androidx.compose.foundation.background
@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -25,6 +26,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,8 +36,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.example.chatapp.R
 import com.example.chatapp.component.ContactCard
 import com.example.chatapp.component.ContactsList
 import com.example.chatapp.component.GetInfo
@@ -43,10 +44,19 @@ import com.example.chatapp.database.UserAuth
 import com.example.chatapp.navigationComponent.Screen
 import com.example.chatapp.ui.theme.Shapes
 import com.example.chatapp.ui.theme.poppinsFont
+import com.example.chatapp.use_case.viewModels.ChatViewModel
+import com.example.chatapp.use_case.viewModels.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier,navController: NavController) {
+fun HomeScreen(
+    modifier: Modifier,
+    navController: NavController,
+    userViewModel: UserViewModel,
+    chatViewModel: ChatViewModel
+) {
+    val userLists by userViewModel.userList.observeAsState(initial = emptyList())
+    val users by userViewModel.users.observeAsState(initial = emptyList())
     val user=UserAuth()
     val listContacts= GetInfo().getContact()
 
@@ -55,6 +65,7 @@ fun HomeScreen(modifier: Modifier,navController: NavController) {
             FloatingActionButton(
                 onClick = {
                     user.logoutUser()
+                    userViewModel.clearUser()
                     navController.navigate("auth"){
                         popUpTo("chat")
                     }
@@ -89,9 +100,10 @@ fun HomeScreen(modifier: Modifier,navController: NavController) {
                         fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                         fontFamily = poppinsFont,
                         fontWeight = FontWeight.Bold,
-
                         )
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = {
+
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Search",
@@ -113,97 +125,22 @@ fun HomeScreen(modifier: Modifier,navController: NavController) {
             Box(
                 modifier = modifier
                     .background(Color.White, shape = Shapes.large)
-                    .fillMaxWidth()
+                    .fillMaxSize()
             ) {
                 LazyColumn(
                     modifier = modifier
                         .padding(horizontal = 5.dp, vertical = 30.dp)
                         .fillMaxWidth()
                 ) {
-                    item {
+                    items(userLists.size){
+                       index ->
                         ContactCard(
-                            numberOfMessage = 2,
-                            userProfilePic = R.drawable.img_2,
-                            userName = "Alvin",
-                            onClick = {
-                                navController.navigate(
-                                    route = Screen.Chat.getUserImage(
-                                        name = "Alvin",
-                                        id = R.drawable.img_2
-                                    )
-                                )
-                            })
-                        ContactCard(
-                            userProfilePic = R.drawable.img_1,
-                            numberOfMessage = 1,
-                            userName = "Perez",
-                            lastChatTime = "7.45 am",
-                            onClick = {
-                                navController.navigate(
-                                    route = Screen.Chat.getUserImage(
-                                        name = "Perez",
-                                        id = R.drawable.img_1
-                                    )
-                                )
-                            })
-                        ContactCard(
-                            userProfilePic = R.drawable.img_3,
-                            numberOfMessage = 3,
-                            userName = "Dan",
-                            lastChatTime = "5.00 pm",
-                            onClick = {
-                                navController.navigate(
-                                    route = Screen.Chat.getUserImage(
-                                        name = "Dan",
-                                        id = R.drawable.img_3
-                                    )
-                                )
-                            })
-                        ContactCard(
-                            userName = "Alex",
-                            lastChatTime = "27/3/23",
-                            onClick = {
-                                navController.navigate(
-                                    route = Screen.Chat.getUserImage(
-                                        name = "Alex",
-                                        id = R.drawable.img_5
-                                    )
-                                )
-                            })
-                        ContactCard(
-                            userProfilePic = R.drawable.img,
-                            numberOfMessage = 2,
-                            lastChatTime = "01/01/23",
-                            onClick = {
-                                navController.navigate(
-                                    route = Screen.Chat.getUserImage(
-                                        name = "Berry Ab",
-                                        id = R.drawable.img
-                                    )
-                                )
-                            })
-                        ContactCard(
-                            userName = "Mex",
-                            lastChatTime = "01/10/22",
-                            onClick = {
-                                navController.navigate(
-                                    route = Screen.Chat.getUserImage(
-                                        name = "Max",
-                                        id = R.drawable.img_5
-                                    )
-                                )
-                            })
-                        ContactCard(
-                            userName = "Luffy",
-                            lastChatTime = "02/08/2022",
-                            onClick = {
-                                navController.navigate(
-                                    route = Screen.Chat.getUserImage(
-                                        name = "Luffy",
-                                        id = R.drawable.img_5
-                                    )
-                                )
-                            })
+                            user = userLists[index]
+                        ) {
+                            chatViewModel.setRecName(userLists[index])
+                            chatViewModel.getMessages(userLists[index].uid.toString())
+                           navController.navigate(Screen.Chat.route)
+                        }
                     }
                 }
             }
@@ -228,5 +165,5 @@ fun Show(
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_MASK)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(modifier = Modifier, navController = rememberNavController())
+//    HomeScreen(modifier = Modifier, navController = rememberNavController())
 }

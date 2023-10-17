@@ -3,24 +3,26 @@ package com.example.chatapp.navigationComponent
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
-import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.example.chatapp.screens.ChatScreen
-import com.example.chatapp.screens.HomeScreen
-import com.example.chatapp.screens.LandingPage
-import com.example.chatapp.screens.LoginScreen
-import com.example.chatapp.screens.SignInScreen
+import com.example.chatapp.screens.mainScreens.ChatScreen
+import com.example.chatapp.screens.mainScreens.HomeScreen
+import com.example.chatapp.screens.SignLogScreen.LandingPage
+import com.example.chatapp.screens.SignLogScreen.LoginScreen
+import com.example.chatapp.screens.SignLogScreen.SignInScreen
+import com.example.chatapp.use_case.viewModels.ChatViewModel
+import com.example.chatapp.use_case.viewModels.LoginViewModel
+import com.example.chatapp.use_case.viewModels.UserViewModel
 
 @Composable
 fun SetupNavGraph(
     navController: NavHostController,
-    entryKey:String
+    entryKey:String,
+    loginViewModel: LoginViewModel,
+    userViewModel: UserViewModel,
+    chatViewModel: ChatViewModel
 ) {
     NavHost(
         navController = navController,
@@ -30,25 +32,13 @@ fun SetupNavGraph(
             composable(
                 route= Screen.Home.route
             ){
-                HomeScreen(modifier = Modifier,navController=navController)
+                HomeScreen(modifier = Modifier,navController=navController, userViewModel = userViewModel,chatViewModel)
             }
             composable(
-                route= Screen.Chat.route,
-                arguments = listOf(
-                    navArgument(name = Key2){
-                        type=NavType.StringType
-                    },
-                    navArgument(Key1){
-                        type= NavType.IntType
-                    }
-                )
+                route = Screen.Chat.route
             ){
-                    back->
-                val argument=back.arguments?.getString(Key2)
-                val image= back.arguments?.getInt(Key1)
-                if (image != null) {
-                    ChatScreen(modifier =Modifier, name = argument.toString(), userImage = image.toInt())
-                }
+
+                ChatScreen(modifier = Modifier, viewModel= chatViewModel)
             }
         }
         navigation(startDestination = Screen.LandingPage.route, route = "auth"){
@@ -56,10 +46,10 @@ fun SetupNavGraph(
                LandingPage(modifier = Modifier, navController = navController)
            }
             composable(Screen.LoginScreen.route){
-                LoginScreen(modifier = Modifier,navController)
+                LoginScreen(modifier = Modifier,navController,loginViewModel)
             }
             composable(Screen.SignInScreen.route){
-                SignInScreen(modifier = Modifier, navController)
+                SignInScreen(modifier = Modifier, navController,loginViewModel)
             }
         }
     }
