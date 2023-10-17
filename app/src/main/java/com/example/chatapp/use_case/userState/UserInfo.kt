@@ -17,6 +17,6 @@ class UserInfo {
 
     override fun toString(): String {
 
-        return this.uid + this.userName
+        return this.uid + this.userName + this.email
     }
 }

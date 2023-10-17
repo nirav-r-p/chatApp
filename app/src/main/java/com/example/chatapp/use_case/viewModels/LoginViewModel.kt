@@ -33,6 +33,7 @@ class LoginViewModel: ViewModel() {
                         _loginEvent.emit(LoginEvent.Success)
                     }
                 } else {
+                    _uiLoadingState.value=UiLoadingState.IsNotLoading
                     onResult(false, task.exception?.message)
                     viewModelScope.launch {
                         _loginEvent.emit(LoginEvent.ErrorLogin(task.exception?.message ?:"Unknown error"))
@@ -53,6 +54,7 @@ class LoginViewModel: ViewModel() {
                         _loginEvent.emit(LoginEvent.Success)
                     }
                 } else {
+                    _uiLoadingState.value=UiLoadingState.IsNotLoading
                     onResult(false, task.exception?.message)
                     viewModelScope.launch {
                         _loginEvent.emit(LoginEvent.ErrorLogin(task.exception?.message ?:"Unknown error"))

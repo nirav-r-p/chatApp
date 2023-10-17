@@ -1,6 +1,7 @@
 package com.example.chatapp.screens.mainScreens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -28,9 +30,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,8 +50,14 @@ import com.example.chatapp.database.UserAuth
 import com.example.chatapp.navigationComponent.Screen
 import com.example.chatapp.ui.theme.Shapes
 import com.example.chatapp.ui.theme.poppinsFont
+import com.example.chatapp.use_case.UserMessage
 import com.example.chatapp.use_case.viewModels.ChatViewModel
+import com.example.chatapp.use_case.viewModels.LoginViewModel
 import com.example.chatapp.use_case.viewModels.UserViewModel
+import com.example.chatapp.validation.getHhMM
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,10 +68,56 @@ fun HomeScreen(
     chatViewModel: ChatViewModel
 ) {
     val userLists by userViewModel.userList.observeAsState(initial = emptyList())
-    val users by userViewModel.users.observeAsState(initial = emptyList())
+    val status by chatViewModel.status.observeAsState(initial = "Online")
+    val users by userViewModel.users.observeAsState()
     val user=UserAuth()
     val listContacts= GetInfo().getContact()
+    userViewModel.mDbRef.child(userViewModel.mAuth.currentUser?.uid.toString()).child("chats").addValueEventListener(
+        object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val mP = mutableMapOf<String, UserMessage>()
+                for (chatShot in snapshot.children){
+                    val key =chatShot.key?.split("-")
+                    Log.d("key", "onDataChange: $key")
+                    if(key?.size!! >1) {
 
+                        val chatInfo = chatShot.child("chatInfo").getValue(UserMessage::class.java)
+                        Log.d("chatInfo", "onDataChange: $chatInfo")
+                        if (key.isNotEmpty() && chatInfo!=null) {
+                            chatInfo.let {
+                                mP.put(key[1], chatInfo!!)
+                            }
+                        }
+                    }
+//                    when (chatShot.child("Status").value.toString()){
+//                        "Typing"->chatViewModel.getStatus("Typing...")
+//                        "Online"->chatViewModel.getStatus("Online")
+//                        "Offline"->chatViewModel.getStatus("")
+//                    }
+                }
+
+               userViewModel.getChatInfo(mP)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        }
+    )
+    var isLoading by rememberSaveable {
+        mutableStateOf(false)
+    }
+    userViewModel.loadingState.observe(LocalLifecycleOwner.current) { loadingState ->
+        isLoading = when (loadingState) {
+            UserViewModel.UiLoadingState.IsLoading-> {
+                true
+            }
+            UserViewModel.UiLoadingState.IsNotLoading -> {
+                false
+            }
+        }
+    }
     Scaffold (
         floatingActionButton = {
             FloatingActionButton(
@@ -125,8 +183,12 @@ fun HomeScreen(
             Box(
                 modifier = modifier
                     .background(Color.White, shape = Shapes.large)
-                    .fillMaxSize()
+                    .fillMaxSize(),
+                contentAlignment =  Alignment.TopStart
             ) {
+//                if(isLoading){
+//                    CircularProgressIndicator()
+//                }
                 LazyColumn(
                     modifier = modifier
                         .padding(horizontal = 5.dp, vertical = 30.dp)
@@ -134,13 +196,21 @@ fun HomeScreen(
                 ) {
                     items(userLists.size){
                        index ->
-                        ContactCard(
-                            user = userLists[index]
-                        ) {
-                            chatViewModel.setRecName(userLists[index])
-                            chatViewModel.getMessages(userLists[index].uid.toString())
-                           navController.navigate(Screen.Chat.route)
-                        }
+                            val lt= if (users?.get(userLists[index].uid)?.lastMessage==null)"New" else users?.get(userLists[index].uid)?.lastMessage.toString()
+                            val laT= if(users?.get(userLists[index].uid)?.lastTime==null) "" else users?.get(userLists[index].uid)?.lastTime.toString()
+                            val unRe= if(users?.get(userLists[index].uid)?.unReadMessage==null) 0 else users?.get(userLists[index].uid)?.unReadMessage!!.toInt()
+                            ContactCard(
+                                user = userLists[index],
+                                lastMessage = if(status=="Typing...") "Typing..." else lt,
+                                lastChatTime = if(laT.isNotEmpty()) getHhMM(laT) else "",
+                                numberOfMessage = unRe
+                            ) {
+                                chatViewModel.setRecName(userLists[index])
+                                chatViewModel.getMessages(userLists[index].uid.toString())
+                                chatViewModel.clearUnRead(userLists[index].uid.toString())
+                                navController.navigate(Screen.Chat.route)
+                            }
+
                     }
                 }
             }

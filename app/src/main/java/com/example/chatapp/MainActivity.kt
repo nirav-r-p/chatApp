@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       val mDbRef = FirebaseDatabase.getInstance().getReference("user")
+
 
         setContent {
             ChatAppTheme {

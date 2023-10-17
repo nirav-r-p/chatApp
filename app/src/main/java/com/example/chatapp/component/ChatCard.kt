@@ -126,15 +126,10 @@ fun ContactCard(
                 fontSize=14.sp,
                 modifier = Modifier
                     .weight(0.7f)
-                    .padding(top = 7.dp),
+                    .padding(top = 9.dp),
                 color = Color.Black
             )
         }
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun ContactCardPreview() {
-//    ContactCard()
-//}

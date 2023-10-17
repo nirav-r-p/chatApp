@@ -1,5 +1,7 @@
 package com.example.chatapp.validation
 
+import java.text.SimpleDateFormat
+import java.util.Locale
 import java.util.regex.Pattern
 
 class Validation {
@@ -18,3 +20,12 @@ class Validation {
         return pat.matcher(input).matches();
     }
 }
+fun getHhMM(inputDateString:String):String{
+    val inputDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    val outputDateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+    val date = inputDateFormat.parse(inputDateString)
+    return outputDateFormat.format(date!!)
+}
+
+
+

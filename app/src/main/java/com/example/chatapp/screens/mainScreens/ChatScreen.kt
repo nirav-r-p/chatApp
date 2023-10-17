@@ -3,27 +3,19 @@ package com.example.chatapp.screens.mainScreens
 import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
-import android.view.WindowInsetsController
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsIgnoringVisibility
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,25 +25,21 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import com.example.chatapp.R
 import com.example.chatapp.component.CardHeader
 import com.example.chatapp.ui.theme.ChatBoxShape
@@ -59,15 +47,13 @@ import com.example.chatapp.ui.theme.Shapes
 import com.example.chatapp.ui.theme.poppinsFont
 import com.example.chatapp.use_case.MessageModel
 import com.example.chatapp.use_case.viewModels.ChatViewModel
-import com.google.android.play.integrity.internal.f
+import com.example.chatapp.validation.getHhMM
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlin.coroutines.coroutineContext
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -82,11 +68,11 @@ fun ChatScreen(
     val status by viewModel.status.observeAsState(initial = "Online")
     val user by viewModel.recName.observeAsState()
     val senderId= FirebaseAuth.getInstance().currentUser?.uid
-    val receiverRoom=user?.uid+senderId
+    val receiverRoom=user?.uid+"-"+senderId
     val coroutineScope= rememberCoroutineScope()
     if(user!=null){
          val myDBRef= FirebaseDatabase.getInstance().reference
-        val senderRoom=senderId+user?.uid
+        val senderRoom=senderId+"-"+user?.uid
         myDBRef.child("user").child(senderId!!).child("chats").child(senderRoom!!).child("messages")
             .addValueEventListener(object : ValueEventListener {
                 var messageLists= mutableListOf<MessageModel>()
@@ -274,7 +260,7 @@ fun SendText(sendText:MessageModel,bool:Boolean) {
                color = Color.Black
            )
            Text(
-               text = sendText.sendTime.toString(),
+               text = getHhMM( sendText.sendTime.toString()),
                fontSize = 10.sp,
                fontFamily = poppinsFont,
                fontWeight = FontWeight.Normal,
