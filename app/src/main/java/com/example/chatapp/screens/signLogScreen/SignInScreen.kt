@@ -1,9 +1,10 @@
-package com.example.chatapp.screens.SignLogScreen
+package com.example.chatapp.screens.signLogScreen
 
-
-
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -38,26 +40,36 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.chatapp.R
 import com.example.chatapp.navigationComponent.Screen
 import com.example.chatapp.ui.theme.ChatBoxShape
 import com.example.chatapp.ui.theme.Shapes
 import com.example.chatapp.ui.theme.poppinsFont
-import com.example.chatapp.use_case.viewModels.LoginViewModel
+import com.example.chatapp.validation.Validation
+import com.example.chatapp.viewModels.LoginViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun LoginScreen(
+fun SignInScreen(
     modifier: Modifier,
     navController: NavController,
-    viewModel: LoginViewModel
+    viewModel: LoginViewModel,
+    onNavigate:()->Unit
 ) {
     val keyboardController =LocalSoftwareKeyboardController.current
-
+    val message by viewModel.message.observeAsState()
+    val validation=Validation()
+    val isVerify by viewModel.verify.observeAsState()
+    var userName by rememberSaveable {
+        mutableStateOf("")
+    }
     var email by rememberSaveable {
         mutableStateOf("")
     }
@@ -77,6 +89,9 @@ fun LoginScreen(
             }
         }
     }
+    if (isVerify == true)  {
+        onNavigate()
+    }
     Column(modifier = modifier.fillMaxSize())
     {
         Box(modifier = modifier
@@ -86,9 +101,10 @@ fun LoginScreen(
             Image(painter = painterResource(id = R.drawable.img_7), contentDescription ="" , contentScale = ContentScale.FillBounds, modifier = modifier
                 .fillMaxSize()
                 .zIndex(5f))
+
         }
         Box (modifier = modifier
-            .weight(1.4f)
+            .weight(1.6f)
             .background(Color.Black)
             .padding(34.dp)
         ){
@@ -98,9 +114,10 @@ fun LoginScreen(
                     fontFamily = poppinsFont,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    fontSize = 36.sp
+                    fontSize = 36.sp,
+                    lineHeight = 34.sp
                 )
-              
+
                 Box(modifier = modifier
                     .weight(1f)
                     .fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -109,9 +126,9 @@ fun LoginScreen(
                             .safeContentPadding()
                             .fillMaxHeight(), verticalArrangement = Arrangement.SpaceEvenly, horizontalAlignment = Alignment.CenterHorizontally) {
                         TextField(
-                            value = email,
-                            onValueChange = { email = it },
-                            label = { Text(text = "User Email") },
+                            value = userName,
+                            onValueChange = { userName = it },
+                            label = { Text(text = "User Name") },
                             modifier = Modifier
                                 .fillMaxWidth(0.95f)
                                 .padding(horizontal = 2.dp)
@@ -130,11 +147,36 @@ fun LoginScreen(
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
-                            shape = Shapes.medium
+                            shape = Shapes.medium,
+
+                        )
+                        TextField(
+                            value = email,
+                            onValueChange = { email = it },
+                            label = { Text(text = "Enter Email") },
+                            modifier = Modifier
+                                .fillMaxWidth(0.95f)
+                                .padding(horizontal = 2.dp)
+                                .background(Color.White, shape = RoundedCornerShape(30.dp)),
+                            singleLine = true,
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    keyboardController?.hide()
+                                }
+                            ),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Text
+                            ),
+                            colors = TextFieldDefaults.textFieldColors(
+                                cursorColor = Color.Black,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            ),
+                            shape = Shapes.medium,
                         )
                         TextField(
                             value = password,
-                            onValueChange = { password = it },
+                            onValueChange = { password=it },
                             label = { Text(text = "Password") },
                             modifier = Modifier
                                 .fillMaxWidth(0.95f)
@@ -155,17 +197,19 @@ fun LoginScreen(
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
                             shape = Shapes.medium,
+                            isError = validation.isValidatePassword(password),
                             visualTransformation = PasswordVisualTransformation()
                         )
                         ElevatedButton(
                             onClick = {
-                                viewModel.loginUser(email, password) { isSuccess, errorMessage ->
-                                    if (isSuccess) {
-                                        navController.navigate(Screen.Home.route){
-                                            popUpTo("auth")
-                                        }
-                                    } else {
-                                        // Show error message to the user
+                                viewModel.signUpUser(name = userName,email, password) { isSuccess, errorMessage ->
+                                    if (isSuccess){
+                                        navController.clearBackStack(Screen.LandingPage.route)
+                                        navController.clearBackStack(Screen.SignInScreen.route)
+                                        userName=""
+                                        email=""
+                                        password=""
+                                    }else {
                                         print(errorMessage.toString())
                                     }
                                 }
@@ -173,18 +217,30 @@ fun LoginScreen(
                             modifier = modifier
                                 .fillMaxWidth()
                                 .height(64.dp)
+
                         )
                         {
                             if (isLoading){
-                                CircularProgressIndicator()
-                            }else {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                )
+                            }
+                            else {
                                 Text(
-                                    text = "Let’s Chat", fontFamily = poppinsFont,
+                                    text = if(message=="Verify Your Email And LogIn") message.toString() else "Create", fontFamily = poppinsFont,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Black
                                 )
                             }
                         }
+                        Text(
+                            text = "already SigIn ? go To Login", fontFamily = poppinsFont,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.clickable {
+                               navController.navigate(Screen.LoginScreen.route)
+                            }
+                        )
                     }
 
                 }
@@ -194,8 +250,9 @@ fun LoginScreen(
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun LoginScreenPreview() {
-//    LoginScreen(modifier = Modifier)
-//}
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(showBackground = true)
+@Composable
+fun SignInScreenPreview() {
+    SignInScreen(modifier = Modifier, navController = rememberNavController(), viewModel = LoginViewModel()){}
+}

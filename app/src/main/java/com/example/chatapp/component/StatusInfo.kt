@@ -22,19 +22,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import com.example.chatapp.R
 import com.example.chatapp.ui.theme.poppinsFont
 
 @Composable
 fun StatusInfo(
-    image:Int= R.drawable.img,
+    image:String,
     name:String="Berry",
     currentStatus:Boolean=true
 ) {
     Box (
         modifier = Modifier
         .height(98.dp)
-        .width(85.dp),
+        .width(85.dp).
+        padding(top = 5.dp),
         contentAlignment = Alignment.Center
     ){
         Column(
@@ -52,7 +54,9 @@ fun StatusInfo(
                 contentAlignment = Alignment.BottomEnd
             ) {
                 Image(
-                    painter = painterResource(image),
+                    painter =if(image.isBlank()) painterResource(R.drawable.img_5) else rememberAsyncImagePainter(
+                            model = image
+                    ),
                     contentDescription = "" , contentScale = ContentScale.FillBounds,
                     modifier = Modifier.clip(
                         CircleShape
@@ -83,5 +87,5 @@ fun StatusInfo(
 @Composable
 @Preview(showBackground = true)
 fun StatusInfoPreview() {
-    StatusInfo()
+    StatusInfo(image = "")
 }

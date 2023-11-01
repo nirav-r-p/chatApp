@@ -1,8 +1,9 @@
-package com.example.chatapp.screens.SignLogScreen
+package com.example.chatapp.screens.signLogScreen
+
+
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,10 +20,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -37,32 +40,28 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.chatapp.R
 import com.example.chatapp.navigationComponent.Screen
 import com.example.chatapp.ui.theme.ChatBoxShape
 import com.example.chatapp.ui.theme.Shapes
 import com.example.chatapp.ui.theme.poppinsFont
-import com.example.chatapp.use_case.viewModels.LoginViewModel
-import com.example.chatapp.validation.Validation
+import com.example.chatapp.viewModels.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun SignInScreen(
+fun LoginScreen(
     modifier: Modifier,
     navController: NavController,
-    viewModel: LoginViewModel
+    viewModel: LoginViewModel,
+    onNavigate:()->Unit
 ) {
     val keyboardController =LocalSoftwareKeyboardController.current
-    val validation=Validation()
-    var userName by rememberSaveable {
-        mutableStateOf("")
-    }
+    val message by viewModel.message.observeAsState(initial = "")
+    val isVerify by viewModel.verify.observeAsState(initial = false)
     var email by rememberSaveable {
         mutableStateOf("")
     }
@@ -82,6 +81,9 @@ fun SignInScreen(
             }
         }
     }
+    if (isVerify){
+        onNavigate()
+    }
     Column(modifier = modifier.fillMaxSize())
     {
         Box(modifier = modifier
@@ -91,10 +93,9 @@ fun SignInScreen(
             Image(painter = painterResource(id = R.drawable.img_7), contentDescription ="" , contentScale = ContentScale.FillBounds, modifier = modifier
                 .fillMaxSize()
                 .zIndex(5f))
-
         }
         Box (modifier = modifier
-            .weight(1.6f)
+            .weight(1.4f)
             .background(Color.Black)
             .padding(34.dp)
         ){
@@ -104,9 +105,10 @@ fun SignInScreen(
                     fontFamily = poppinsFont,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    fontSize = 36.sp
+                    fontSize = 36.sp,
+                    lineHeight = 34.sp
                 )
-
+              
                 Box(modifier = modifier
                     .weight(1f)
                     .fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -115,9 +117,9 @@ fun SignInScreen(
                             .safeContentPadding()
                             .fillMaxHeight(), verticalArrangement = Arrangement.SpaceEvenly, horizontalAlignment = Alignment.CenterHorizontally) {
                         TextField(
-                            value = userName,
-                            onValueChange = { userName = it },
-                            label = { Text(text = "User Name") },
+                            value = email,
+                            onValueChange = { email = it },
+                            label = { Text(text = "User Email") },
                             modifier = Modifier
                                 .fillMaxWidth(0.95f)
                                 .padding(horizontal = 2.dp)
@@ -136,33 +138,7 @@ fun SignInScreen(
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
-                            shape = Shapes.medium,
-
-                        )
-                        TextField(
-                            value = email,
-                            onValueChange = { email = it },
-                            label = { Text(text = "E-mail") },
-                            modifier = Modifier
-                                .fillMaxWidth(0.95f)
-                                .padding(horizontal = 2.dp)
-                                .background(Color.White, shape = RoundedCornerShape(30.dp)),
-                            singleLine = true,
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    keyboardController?.hide()
-                                }
-                            ),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Text
-                            ),
-                            colors = TextFieldDefaults.textFieldColors(
-                                cursorColor = Color.Black,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            ),
-                            shape = Shapes.medium,
-//                            isError = validation.isValidateEmail(email)
+                            shape = Shapes.medium
                         )
                         TextField(
                             value = password,
@@ -187,18 +163,18 @@ fun SignInScreen(
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
                             shape = Shapes.medium,
-                            isError = validation.isValidatePassword(password),
                             visualTransformation = PasswordVisualTransformation()
                         )
                         ElevatedButton(
                             onClick = {
-                                viewModel.signUpUser(name = userName,email, password) { isSuccess, errorMessage ->
-                                    if (isSuccess){
-                                        navController.navigate(Screen.Home.route){
-                                            popUpTo("auth")
-                                        }
+                                viewModel.loginUser(email, password) { isSuccess, errorMessage ->
+                                    if (isSuccess) {
+                                        navController.clearBackStack(Screen.LandingPage.route)
+                                        navController.clearBackStack(Screen.SignInScreen.route)
+                                        navController.clearBackStack(Screen.LoginScreen.route)
 
-                                    }else {
+                                    } else {
+                                        // Show error message to the user
                                         print(errorMessage.toString())
                                     }
                                 }
@@ -209,27 +185,24 @@ fun SignInScreen(
                         )
                         {
                             if (isLoading){
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                )
+                                CircularProgressIndicator()
                             }else {
                                 Text(
-                                    text = "Create", fontFamily = poppinsFont,
+                                    text =if (message=="Please Verify Your Email Id") message.toString() else  "Let’s Chat", fontFamily = poppinsFont,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Black
                                 )
                             }
                         }
-                        Text(
-                            text = "already SigIn ? go To Login", fontFamily = poppinsFont,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            modifier = Modifier.clickable {
-                               navController.navigate(Screen.LoginScreen.route)
-                            }
-                        )
                     }
-
+                }
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TextButton(onClick = { /*TODO*/ }) {
+                        Text(text = "Forgot Password??")
+                    }
                 }
             }
 
@@ -237,8 +210,8 @@ fun SignInScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun SignInScreenPreview() {
-    SignInScreen(modifier = Modifier, navController = rememberNavController(), viewModel = LoginViewModel())
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun LoginScreenPreview() {
+//    LoginScreen(modifier = Modifier)
+//}

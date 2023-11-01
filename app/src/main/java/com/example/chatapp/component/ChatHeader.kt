@@ -3,20 +3,17 @@ package com.example.chatapp.component
 
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -31,18 +28,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.chatapp.R
 import com.example.chatapp.ui.theme.poppinsFont
 
 @Composable
 fun CardHeader(
     userName:String="Berry Ab",
-    userProfilePic:Int= R.drawable.img_4,
+    userProfilePic:String= "",
     action:String,
     horizontalPadding: Dp =6.dp,
     verticalPadding: Dp =6.dp
@@ -56,7 +54,7 @@ fun CardHeader(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = verticalPadding, horizontal =horizontalPadding )
+                .padding(vertical = verticalPadding, horizontal = horizontalPadding)
                 .clickable { }
         ) {
             Row(
@@ -72,7 +70,9 @@ fun CardHeader(
                     contentAlignment =  Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(userProfilePic),
+                        painter = if(userProfilePic.isBlank())painterResource(R.drawable.img_4) else rememberAsyncImagePainter(
+                            model = userProfilePic
+                        ),
                         contentDescription = "" , contentScale = ContentScale.FillBounds,
                         modifier = Modifier
                             .clip(
@@ -94,22 +94,22 @@ fun CardHeader(
                         text = userName,
                         fontFamily = poppinsFont,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize=15.sp,
-                        color= Color.White
+                        fontSize= if (action.isBlank()) 20.sp else 15.sp,
                     )
-                    Text(
-                        text = action,
-                        fontFamily = poppinsFont,
-                        fontWeight = FontWeight.Normal,
-                        fontSize=14.sp,
-                        modifier = Modifier.fillMaxWidth(),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = Color.White
-                    )
+                    if (action.isNotBlank()) {
+                        Text(
+                            text = action,
+                            fontFamily = poppinsFont,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 14.sp,
+                            modifier = Modifier.fillMaxWidth(),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
                 IconButton(onClick = { /*TODO*/ }) {
-                    Icon(imageVector = Icons.Default.MoreVert, contentDescription ="More", modifier = Modifier.size(45.dp), tint = Color.White )
+                    Icon(imageVector = Icons.Default.MoreVert, contentDescription ="More", modifier = Modifier.size(45.dp))
                 }
             }
         }

@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,19 +25,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.chatapp.R
 import com.example.chatapp.ui.theme.poppinsFont
-import com.example.chatapp.use_case.userState.UserInfo
+import com.example.chatapp.databaseSchema.UserInfo
+import com.google.android.play.integrity.internal.l
 
 @Composable
 fun ContactCard(
-    user:UserInfo,
-    lastMessage:String="Hi Nirav, I am Looking for Android Dev",
-    lastChatTime:String="8.30 pm",
+    user: UserInfo,
+    lastMessage:String,
+    lastChatTime:String,
     numberOfMessage:Int=0,
     onClick:()->Unit
 ) {
@@ -46,7 +48,7 @@ fun ContactCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
-            .clickable (onClick = onClick)
+            .clickable(onClick = onClick)
     ) {
         Row(
             modifier = Modifier
@@ -60,7 +62,9 @@ fun ContactCard(
                 contentAlignment =  Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(R.drawable.img),
+                    painter = if(user.pic=="") painterResource(R.drawable.img_4) else rememberAsyncImagePainter(
+                        model = user.pic
+                    ),
                     contentDescription = "" , contentScale = ContentScale.FillBounds,
                     modifier = Modifier
                         .clip(
@@ -71,7 +75,9 @@ fun ContactCard(
                 )
                 if(numberOfMessage>0){
                     Box (
-                        modifier = Modifier.height(51.dp).width(51.dp),
+                        modifier = Modifier
+                            .height(51.dp)
+                            .width(51.dp),
                         contentAlignment = Alignment.TopEnd){
                         Box(
                             modifier = Modifier
@@ -109,7 +115,7 @@ fun ContactCard(
                     color= Color.Black
                 )
                 Text(
-                    text = lastMessage,
+                    text =lastMessage,
                     fontFamily = poppinsFont,
                     fontWeight = FontWeight.Normal,
                     fontSize=14.sp,
@@ -119,16 +125,32 @@ fun ContactCard(
                     color = Color.Black
                 )
             }
-            Text(
-                text = lastChatTime,
-                fontFamily = poppinsFont,
-                fontWeight = FontWeight.Normal,
-                fontSize=14.sp,
+            Column(
                 modifier = Modifier
-                    .weight(0.7f)
-                    .padding(top = 9.dp),
-                color = Color.Black
-            )
+                    .weight(0.9f)
+                    .padding(top = 10.dp, end = 10.dp)
+            ) {
+                Text(
+                    text = lastChatTime,
+                    fontFamily = poppinsFont,
+                    fontWeight = FontWeight.Normal,
+                    fontSize=12.sp,
+                    color = Color.Black,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(1.5.dp))
+                Text(
+                    text = user.tag.toString(),
+                    fontFamily = poppinsFont,
+                    fontWeight = FontWeight.Normal,
+                    fontSize=10.sp,
+                    color = Color.LightGray,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
         }
     }
 }

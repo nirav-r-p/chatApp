@@ -1,10 +1,10 @@
-package com.example.chatapp.use_case
+package com.example.chatapp.databaseSchema
 
-import com.example.chatapp.use_case.MessageModel
+import android.util.Log
 
 class UserMessage {
     var unReadMessage:Int?=null
-    var lastMessage: String?=null
+     var lastMessage: String?=null
     var lastTime: String?=null
 
 
@@ -16,4 +16,5 @@ class UserMessage {
         this.lastTime=time
 
     }
+
 }

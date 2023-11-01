@@ -5,6 +5,8 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,6 +28,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -32,21 +36,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsAnimationCompat
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.chatapp.R
 import com.example.chatapp.component.CardHeader
 import com.example.chatapp.ui.theme.ChatBoxShape
 import com.example.chatapp.ui.theme.Shapes
 import com.example.chatapp.ui.theme.poppinsFont
-import com.example.chatapp.use_case.MessageModel
-import com.example.chatapp.use_case.viewModels.ChatViewModel
+import com.example.chatapp.databaseSchema.MessageModel
+import com.example.chatapp.viewModels.ChatViewModel
 import com.example.chatapp.validation.getHhMM
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -57,23 +69,25 @@ import kotlinx.coroutines.launch
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-@SuppressLint("MutableCollectionMutableState")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     modifier: Modifier,
-    viewModel: ChatViewModel
+    viewModel: ChatViewModel,
+    navController: NavController
 ) {
+
     val messageList by viewModel.messages.observeAsState(initial = emptyList())
-    val status by viewModel.status.observeAsState(initial = "Online")
+    val status by viewModel.status.observeAsState(initial = "Offline")
     val user by viewModel.recName.observeAsState()
     val senderId= FirebaseAuth.getInstance().currentUser?.uid
     val receiverRoom=user?.uid+"-"+senderId
     val coroutineScope= rememberCoroutineScope()
+    val lazyScroll= rememberLazyListState()
     if(user!=null){
          val myDBRef= FirebaseDatabase.getInstance().reference
         val senderRoom=senderId+"-"+user?.uid
-        myDBRef.child("user").child(senderId!!).child("chats").child(senderRoom!!).child("messages")
+        myDBRef.child("user").child(senderId!!).child("chats").child(senderRoom).child("messages")
             .addValueEventListener(object : ValueEventListener {
                 var messageLists= mutableListOf<MessageModel>()
                 @SuppressLint("NotifyDataSetChanged")
@@ -87,18 +101,23 @@ fun ChatScreen(
                         Log.d("Messages", "$count")
                     }
                     viewModel.setMessage(messageLists)
+                    coroutineScope.launch {
+                        if (messageList.isNotEmpty()) {
+                            lazyScroll.animateScrollToItem(messageList.size - 1)
+                        }
+                    }
                 }
                 override fun onCancelled(error: DatabaseError) {
 
                 }
             })
-        myDBRef.child("user").child(user?.uid!!).child("chats").child(receiverRoom!!).child("Status").addValueEventListener(
+        myDBRef.child("user").child(user?.uid!!).child("chats").child(receiverRoom).child("Status").addValueEventListener(
             object : ValueEventListener  {
                 override fun onDataChange(snapshot: DataSnapshot) {
                         when (snapshot.value){
-                            "Typing"->viewModel.getStatus("Typing...")
-                            "Online"->viewModel.getStatus("Online")
-                            "Offline"->viewModel.getStatus("")
+                            "Typing"->viewModel.setUserStatus("Typing...")
+                            "Online"->viewModel.setUserStatus("Online")
+                            "Offline"->viewModel.setUserStatus("")
                         }
                 }
                 override fun onCancelled(error: DatabaseError) {
@@ -107,16 +126,23 @@ fun ChatScreen(
             }
         )
     }
-    val lazyScroll= rememberLazyListState()
+
     var messageText by remember {
         mutableStateOf("")
     }
+
+    DisposableEffect(key1 = Unit, effect ={
+        onDispose {
+            viewModel.setStatus(recId = user?.uid.toString(), "Offline")
+        }
+    } )
+
       Scaffold(
           topBar = {
               CardHeader(
                   userName = user?.userName.toString(),
-                  userProfilePic = R.drawable.img_2,
-                  action = status.toString(),
+                  userProfilePic = user?.pic.toString(),
+                  action = status,
                   verticalPadding = 20.dp,
                   horizontalPadding = 8.dp
               )
@@ -165,33 +191,44 @@ fun ChatScreen(
               ) {
                   OutlinedTextField(
                       value = messageText, onValueChange = {
+
                           viewModel.setStatus(recId = user?.uid.toString(), "Typing")
                           messageText = it
                       },
                       shape = Shapes.large,
                       modifier = Modifier
                           .fillMaxWidth()
-                          .padding(10.dp),
+                          .padding(10.dp).onFocusEvent {
+                              coroutineScope.launch {
+                                  if (messageList.isNotEmpty()) {
+                                      lazyScroll.animateScrollToItem(messageList.size - 1)
+                                  }
+                              }
+                          },
                       trailingIcon = {
-                          IconButton(
-                              onClick = {
-                                  coroutineScope.launch {
-                                      if (messageList.isNotEmpty()) {
-                                          lazyScroll.animateScrollToItem(messageList.size - 1)
+                          Row {
+                              IconButton(onClick = { /*TODO*/ }) {
+                                  Icon(
+                                      imageVector = Icons.Default.Attachment,
+                                      contentDescription = "Attach",
+                                      modifier = Modifier.rotate(240f)
+                                  )
+                              }
+                              IconButton(
+                                  onClick = {
+                                      if (user?.uid != null) {
+                                          viewModel.setStatus(recId = user?.uid.toString(), "Online")
+                                          viewModel.addMessage(
+                                              recId = user?.uid.toString(),
+                                              message = messageText
+                                          )
+                                          messageText = ""
                                       }
-                                  }
-                                  if (user?.uid != null) {
-                                      viewModel.setStatus(recId = user?.uid.toString(), "Online")
-                                      viewModel.addMessage(
-                                          recId = user?.uid.toString(),
-                                          message = messageText
-                                      )
-                                      messageText = ""
-                                  }
 
-                              },
-                          ) {
-                              Icon(imageVector = Icons.Default.Send, contentDescription = "Send")
+                                  },
+                              ) {
+                                  Icon(imageVector = Icons.Default.Send, contentDescription = "Send")
+                              }
                           }
                       },
                       label = {
@@ -203,7 +240,8 @@ fun ChatScreen(
                       }, textStyle = TextStyle(
                           color = Color.Black
                       ),
-                      maxLines = 2
+                      maxLines = 2,
+
                   )
               }
           }
@@ -216,7 +254,7 @@ fun SendBox(
     modifier: Modifier,
     messageModel: MessageModel
 ) {
-    var pos=messageModel.senderId!=FirebaseAuth.getInstance().currentUser?.uid
+    val pos=messageModel.senderId!=FirebaseAuth.getInstance().currentUser?.uid
     Row(
         modifier = modifier.fillMaxWidth(),
         ){
@@ -235,13 +273,18 @@ fun SendBox(
    Box(modifier = Modifier.height(12.dp))
 }
 @Composable
-fun SendText(sendText:MessageModel,bool:Boolean) {
-    val textAlign=if(bool){
+fun SendText(sendText: MessageModel, bool:Boolean) {
+
+    val columnAlign=if(bool){
        Alignment.End
     }else{
         Alignment.Start
     }
-
+   val textAlign = if (bool){
+           TextAlign.End
+       }else{
+       TextAlign.Start
+   }
     Box (
         modifier = Modifier
             .padding(12.dp)
@@ -249,18 +292,28 @@ fun SendText(sendText:MessageModel,bool:Boolean) {
         contentAlignment = Alignment.Center
     ){
        Column(
-           horizontalAlignment = textAlign,
-           modifier = Modifier.fillMaxWidth()
+           horizontalAlignment = columnAlign,
+           modifier = Modifier
+               .fillMaxWidth()
+               .pointerInput(Unit) {
+                   detectTapGestures(
+                       onLongPress = {
+
+                       }
+                   )
+               }
        ) {
            Text(
                text = sendText.message.toString(),
                fontSize = 15.sp,
                fontFamily = poppinsFont,
                fontWeight = FontWeight.Normal,
-               color = Color.Black
+               color = Color.Black,
+               modifier = Modifier.fillMaxWidth(0.75f),
+               textAlign = textAlign
            )
            Text(
-               text = getHhMM( sendText.sendTime.toString()),
+               text = getHhMM(sendText.sendTime.toString()),
                fontSize = 10.sp,
                fontFamily = poppinsFont,
                fontWeight = FontWeight.Normal,
@@ -270,9 +323,12 @@ fun SendText(sendText:MessageModel,bool:Boolean) {
     }
 
 }
+
+
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true, backgroundColor = 0)
 @Composable
 fun ChatScreenPreview() {
-    ChatScreen(modifier = Modifier, viewModel = ChatViewModel())
+    ChatScreen(modifier = Modifier, viewModel = ChatViewModel(), navController = rememberNavController())
 }

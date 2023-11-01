@@ -9,7 +9,9 @@ val Shapes=Shapes(
     medium = RoundedCornerShape(20.dp),
     large = RoundedCornerShape(40.dp)
 )
-
+var contectContenerShapes=Shapes(
+    large = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)
+)
 val sendBoxShape=Shapes(
     small= RoundedCornerShape(20.dp,0.dp,20.dp,20.dp)
 )

@@ -1,4 +1,4 @@
-package com.example.chatapp.screens.SignLogScreen
+package com.example.chatapp.screens.signLogScreen
 
 
 import android.annotation.SuppressLint
@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -50,13 +49,16 @@ fun LandingPage(
             .background(Color.Black)
             .padding(36.dp)
         ){
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
                 Text(
                     text = "Stay connected with your friends and family",
                     fontFamily = poppinsFont,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     fontSize = 36.sp,
+                    lineHeight = 35.sp
                 )
                 Row (verticalAlignment = Alignment.CenterVertically){
                     Icon(
