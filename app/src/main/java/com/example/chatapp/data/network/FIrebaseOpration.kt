@@ -326,35 +326,7 @@ open class FirebaseChatOperation{
             }
     }
 
-//    suspend fun getAllMessage():Flow<Map<String,List<MessageModel>>> = callbackFlow{
-//        val mapValue= mutableMapOf<String,List<MessageModel>>()
-//        val valueEvent=object :ValueEventListener{
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                for (sp in snapshot.children){
-//                    val roomId=sp.key
-//                    val type=object:GenericTypeIndicator<List<MessageModel>>() {}
-//                    val listOfMessage= sp.getValue(type)
-//                    if (roomId != null ) {
-//                        if (listOfMessage != null) {
-//                            mapValue[roomId] = listOfMessage
-//                        }else{
-//                            mapValue[roomId] = emptyList()
-//                        }
-//                    }
-//                }
-//                trySend(mapValue)
-//                close()
-//            }
-//            override fun onCancelled(error: DatabaseError) {
-//                close(error.toException())
-//            }
-//
-//        }
-//        mDbRef.child(senderId!!).child("chats").addListenerForSingleValueEvent(valueEvent)
-//        awaitClose {
-//            mDbRef.child(senderId).child("chats").addListenerForSingleValueEvent(valueEvent)
-//        }
-//    }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun updatePendingMessage(mapValue:Map<String,List<MessageModel>>):Flow<Boolean> = callbackFlow{

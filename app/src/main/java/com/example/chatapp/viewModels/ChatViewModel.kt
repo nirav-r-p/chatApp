@@ -45,43 +45,15 @@ class ChatViewModel(
         net.value?.let { chatRepository.setNetAvailable(it) }
         getMessages(recName.value?.uid.toString())
         clearUnRead(recName.value?.uid.toString())
-//        setStatus(recName.value?.uid.toString(),"Online")
+
 
     }
     @RequiresApi(Build.VERSION_CODES.O)
     fun addMessage(recId:String, message:String){
-
-//        val senderRoom= "$senderId-$recId"
-//        val receiverRoom= "$recId-$senderId"
         val currentDateTime = LocalDateTime.now()
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         val currentTime = currentDateTime.format(formatter)
-//        Log.d("message", "addMessage: $message")
-//        val messageObject = MessageModel(message =message,recId,currentTime)
-//        myDBRef.child("user").child(senderId!!).child("chats").child(senderRoom).child("messages").push()
-//            .setValue(messageObject).addOnCompleteListener {
-//                myDBRef.child("user").child(senderId).child("chats").child(senderRoom).child("chatInfo").child("lastMessage").setValue(message)
-//                myDBRef.child("user").child(senderId).child("chats").child(senderRoom).child("chatInfo").child("lastTime").setValue(currentTime)
-//                myDBRef.child("user").child(recId).child("chats").child(receiverRoom).child("messages").push()
-//                    .setValue(messageObject).addOnCompleteListener {
-//                        clearUnRead(recId)
-//                        myDBRef.child("user").child(recId).child("chats").child(receiverRoom).child("chatInfo").child("unReadMessage").get().addOnSuccessListener {
-//                            dataSnapshot->
-//                            val unReadMessage = dataSnapshot.getValue(Int::class.java)
-//                            if (unReadMessage != null) {
-//                                // Handle the unReadMessage value here
-//                                val unRead:Int =unReadMessage
-//                                myDBRef.child("user").child(recId).child("chats").child(receiverRoom).child("chatInfo").child("unReadMessage").setValue(unRead+1)
-//                                // The value is retrieved as unReadMessage and can be Long, Int, or any other data type based on what you have in the database
-//                            } else {
-//                                // Handle the case where the value is null
-//                                myDBRef.child("user").child(recId).child("chats").child(receiverRoom).child("chatInfo").child("unReadMessage").setValue(1)
-//                            }
-//                       }
-//                        myDBRef.child("user").child(recId).child("chats").child(receiverRoom).child("chatInfo").child("lastMessage").setValue(message)
-//                        myDBRef.child("user").child(senderId).child("chats").child(senderRoom).child("chatInfo").child("lastTime").setValue(currentTime)
-//                    }
-//            }
+
         viewModelScope.launch {
             try {
                 chatRepository.addMessage(recId,message, time = currentTime)
@@ -94,41 +66,13 @@ class ChatViewModel(
 
     }
     private fun clearUnRead(recId: String){
-//        val senderRoom= "$senderId-$recId"
-//        myDBRef.child("user").child(senderId!!).child("chats").child(senderRoom).child("chatInfo").child("unReadMessage").setValue(0)
         chatRepository.clearUnReadCount(recId)
     }
     fun setMessage(message:List<MessageModel>){
         _messages.value=message
     }
     private fun getMessages(recId:String){
-//        val senderRoom= "$senderId-$recId"
-//        myDBRef.child("user").child(senderId!!).child("chats").child(senderRoom).child("messages")
-//            .addValueEventListener(object : ValueEventListener {
-//                var messageLists= mutableListOf<MessageModel>()
-//                @SuppressLint("NotifyDataSetChanged")
-//                override fun onDataChange(snapshot: DataSnapshot) {
-//                    messageLists.clear()
-//                    var count = 0
-//                    for (postSnapshot in snapshot.children){
-//                        val message = postSnapshot.getValue(MessageModel::class.java)
-//
-//                        messageLists.add(message!!)
-//                        count++
-//                        Log.d("Messages", "$count")
-//                    }
-//                    _messages.value=messageLists
-//                    if (messageLists.size==1){
-//                        val mDbRef = FirebaseDatabase.getInstance().getReference("user")
-//                        val contact=  Contacts(userName = "",uid= senderId)
-//                         mDbRef.child(recId).child("Contact").push().setValue(contact)
-//                    }
-//
-//                }
-//                override fun onCancelled(error: DatabaseError) {
-//
-//                }
-//            })
+
         viewModelScope.launch {
             chatRepository.getMessage(recId).collect{
                 _messages.value=it
