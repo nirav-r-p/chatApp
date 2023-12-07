@@ -14,8 +14,4 @@ class MessageModel {
          this.sendTime=sendTime
          this.senderId=senderId
      }
-
-
-
-
 }

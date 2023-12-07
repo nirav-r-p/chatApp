@@ -1,7 +1,5 @@
 package com.example.chatapp.screens.mainScreens
 
-import android.content.res.Resources.Theme
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -25,7 +23,6 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -49,11 +46,9 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.chatapp.R
 import com.example.chatapp.component.UserInfoLabel
-import com.example.chatapp.databaseSchema.UserInfo
 import com.example.chatapp.ui.theme.poppinsFont
 import com.example.chatapp.viewModels.UserViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileSetting(
     viewModel: UserViewModel,
@@ -263,5 +258,5 @@ fun ProfileSetting(
 @Preview
 @Composable
 fun ProfileSettingPreview() {
-    ProfileSetting(viewModel = UserViewModel(), navController = rememberNavController(),{})
+//    ProfileSetting(viewModel = UserViewModel(), navController = rememberNavController()) {}
 }

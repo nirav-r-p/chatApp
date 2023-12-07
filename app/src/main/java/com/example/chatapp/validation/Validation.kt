@@ -53,13 +53,11 @@ fun formatChatTimestamp(timestamp: String): String {
         ) {
             // Today
             val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-            return timeFormat.format(inputDate)
+            return inputDate?.let { timeFormat.format(it) }.toString()
         } else if (
             calendar.get(Calendar.YEAR) == yesterday.get(Calendar.YEAR) &&
             calendar.get(Calendar.DAY_OF_YEAR) == yesterday.get(Calendar.DAY_OF_YEAR)
         ) {
-            // Yesterday
-
             return "Yesterday "
         } else {
             // Other days

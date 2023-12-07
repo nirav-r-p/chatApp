@@ -1,9 +1,7 @@
 package com.example.chatapp.screens.mainScreens
 
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,13 +10,11 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +26,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.UiMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -38,7 +33,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.chatapp.ui.theme.poppinsFont
 import com.example.chatapp.viewModels.UserViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InviteUser(
   userViewModel: UserViewModel,
@@ -154,8 +148,8 @@ fun InviteUser(
    }
 }
 
-@Preview()
+@Preview
 @Composable
 fun InviteUserPreview() {
-    InviteUser(userViewModel = UserViewModel(), navController = rememberNavController())
+//    InviteUser(userViewModel = UserViewModel(), navController = rememberNavController())
 }

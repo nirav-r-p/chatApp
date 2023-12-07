@@ -1,25 +1,14 @@
 package com.example.chatapp.viewModels
 
-import android.R.attr
-import android.app.Activity
+
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.compose.ui.platform.LocalContext
-
-
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.chatapp.MainActivity
 import com.example.chatapp.databaseSchema.UserInfo
-import com.google.firebase.FirebaseException
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.PhoneAuthCredential
-import com.google.firebase.auth.PhoneAuthOptions
-import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.ktx.Firebase
@@ -28,7 +17,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.concurrent.TimeUnit
 
 
 class LoginViewModel: ViewModel() {
@@ -137,10 +125,7 @@ class LoginViewModel: ViewModel() {
 
     fun isLoggedIn():Boolean{
         val auth = Firebase.auth
-        if(auth.currentUser!=null && auth.currentUser!!.isEmailVerified){
-            return true
-        }
-        return false
+        return auth.currentUser!=null && auth.currentUser!!.isEmailVerified
     }
     sealed class LoginEvent{
         data class ErrorLogin(val error: String): LoginEvent()

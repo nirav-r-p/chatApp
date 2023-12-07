@@ -31,9 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.chatapp.R
-import com.example.chatapp.ui.theme.poppinsFont
 import com.example.chatapp.databaseSchema.UserInfo
-import com.google.android.play.integrity.internal.l
+import com.example.chatapp.ui.theme.poppinsFont
 
 @Composable
 fun ContactCard(
@@ -122,7 +121,7 @@ fun ContactCard(
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = Color.Black
+                    color = if (lastMessage=="Typing..") Color.Green else Color.Black
                 )
             }
             Column(

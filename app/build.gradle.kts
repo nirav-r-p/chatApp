@@ -1,7 +1,11 @@
+
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
+
 }
 
 android {
@@ -31,11 +35,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -49,6 +53,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
 }
 
 dependencies {
@@ -75,12 +80,23 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
 
 
+    implementation("androidx.room:room-ktx:2.5.2")
+
+    val room_version = "2.5.2"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+
+
+
     implementation("io.coil-kt:coil-compose:2.0.0-rc01")
     implementation("com.google.firebase:firebase-storage:20.3.0")
-    implementation("com.google.firebase:firebase-messaging:23.3.0")
+    implementation("com.google.firebase:firebase-messaging:23.3.1")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
+    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -89,6 +105,7 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation(platform("com.google.firebase:firebase-bom:32.2.3"))

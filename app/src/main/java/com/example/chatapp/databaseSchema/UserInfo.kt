@@ -1,5 +1,8 @@
 package com.example.chatapp.databaseSchema
 
+
+import com.google.gson.Gson
+
 class UserInfo {
      var userName: String? =null
      var email: String? =null
@@ -32,6 +35,10 @@ class UserInfo {
 
         return this.uid + this.userName + this.email
     }
+
+    fun toJsonData():String{
+        return Gson().toJson(this)
+    }
 }
 
 class Contacts{
@@ -44,3 +51,5 @@ class Contacts{
     }
 
 }
+
+

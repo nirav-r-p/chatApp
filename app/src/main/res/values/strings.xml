@@ -48,4 +48,5 @@
     </string>
     <string name="title_activity_chat">ChatActivity</string>
     <string name="title_activity_profile_setting">ProfileSettingActivity</string>
+    <string name="title_activity_chat_screen">ChatScreen</string>
 </resources>

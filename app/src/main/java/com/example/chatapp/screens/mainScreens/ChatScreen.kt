@@ -5,7 +5,6 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +20,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -41,25 +39,19 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsAnimationCompat
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.example.chatapp.R
 import com.example.chatapp.component.CardHeader
+import com.example.chatapp.databaseSchema.MessageModel
 import com.example.chatapp.ui.theme.ChatBoxShape
 import com.example.chatapp.ui.theme.Shapes
 import com.example.chatapp.ui.theme.poppinsFont
-import com.example.chatapp.databaseSchema.MessageModel
-import com.example.chatapp.viewModels.ChatViewModel
 import com.example.chatapp.validation.getHhMM
+import com.example.chatapp.viewModels.ChatViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -69,12 +61,10 @@ import kotlinx.coroutines.launch
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     modifier: Modifier,
     viewModel: ChatViewModel,
-    navController: NavController
 ) {
 
     val messageList by viewModel.messages.observeAsState(initial = emptyList())
@@ -134,6 +124,7 @@ fun ChatScreen(
     DisposableEffect(key1 = Unit, effect ={
         onDispose {
             viewModel.setStatus(recId = user?.uid.toString(), "Offline")
+            viewModel.setTyping(user?.uid.toString(),messageList.last().message!!)
         }
     } )
 
@@ -148,6 +139,7 @@ fun ChatScreen(
               )
           }
       ) { padding->
+
           Column(
               modifier = modifier
                   .fillMaxSize()
@@ -191,20 +183,23 @@ fun ChatScreen(
               ) {
                   OutlinedTextField(
                       value = messageText, onValueChange = {
-
                           viewModel.setStatus(recId = user?.uid.toString(), "Typing")
+                          viewModel.setTyping(user?.uid.toString())
                           messageText = it
                       },
                       shape = Shapes.large,
                       modifier = Modifier
                           .fillMaxWidth()
                           .padding(10.dp).onFocusEvent {
-                              coroutineScope.launch {
-                                  if (messageList.isNotEmpty()) {
-                                      lazyScroll.animateScrollToItem(messageList.size - 1)
+                              if(it.isCaptured) {
+                                  coroutineScope.launch {
+                                      if (messageList.isNotEmpty()) {
+                                          lazyScroll.animateScrollToItem(messageList.size - 1)
+                                      }
                                   }
                               }
-                          },
+                          }
+                          ,
                       trailingIcon = {
                           Row {
                               IconButton(onClick = { /*TODO*/ }) {
@@ -223,6 +218,11 @@ fun ChatScreen(
                                               message = messageText
                                           )
                                           messageText = ""
+                                          coroutineScope.launch {
+                                              if (messageList.isNotEmpty()) {
+                                                  lazyScroll.animateScrollToItem(messageList.size - 1)
+                                              }
+                                          }
                                       }
 
                                   },
@@ -330,5 +330,5 @@ fun SendText(sendText: MessageModel, bool:Boolean) {
 @Preview(showBackground = true, backgroundColor = 0)
 @Composable
 fun ChatScreenPreview() {
-    ChatScreen(modifier = Modifier, viewModel = ChatViewModel(), navController = rememberNavController())
+//    ChatScreen(modifier = Modifier)
 }
