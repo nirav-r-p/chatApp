@@ -138,6 +138,8 @@ fun ChatScreen(
                   horizontalPadding = 8.dp
               )
           }
+
+
       ) { padding->
 
           Column(
